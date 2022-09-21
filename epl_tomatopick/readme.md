@@ -32,7 +32,7 @@ position string
 );
 ```
 
-An instance of the **TreeToPickTomatoesFrom** schema translates to a command given to the trones to pick tomatoes from it, whereas an instance of the **DronePicking** schema is issued once a certain drone has picked one tomato.
+An instance of the **TreeToPickTomatoesFrom** schema translates to a command given to the drones to pick tomatoes from it, whereas an instance of the **DronePicking** schema is issued once a certain drone has picked one tomato.
 
 The position attribute is represented as a string as it will not be used in this example.
 
@@ -45,4 +45,10 @@ TreeToPickTomatoesFrom = {,}
 DronePicking = {,}
 t=t.plus(1 seconds)
 ```
+
+### Assignment
+
+> Tell every 20 seconds how many tomatoes the drones picked in the last 5 minutes grouped by their kind.
+
+
 

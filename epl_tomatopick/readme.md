@@ -33,6 +33,7 @@ position string
 ```
 
 An instance of the **TreeToPickTomatoesFrom** schema translates to a command given to the trones to pick tomatoes from it, whereas an instance of the **DronePicking** schema is issued once a certain drone has picked one tomato.
+
 The position attribute is represented as a string as it will not be used in this example.
 
 For now these attributes will suffice. We will modify them in the future.

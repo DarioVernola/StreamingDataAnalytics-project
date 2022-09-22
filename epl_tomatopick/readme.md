@@ -63,6 +63,30 @@ DronePicking = {droneID = 2, servicedTreeID = 1, position = 'A1'}
 t=t.plus(20 seconds)
 
 
+trial
+
+
+TreeToPickTomatoesFrom = {treeID = 1 , position = 'A1', type = 'cherry', pick_start = 1, pick_end = 40}
+t=t.plus(20 seconds)
+DronePicking = {droneID = 1, servicedTreeID = 1, position = 'A1'}
+TreeToPickTomatoesFrom = {treeID = 2 , position = 'B2', type = 'yellow', pick_start = 3, pick_end = 70}
+t=t.plus(20 seconds)
+DronePicking = {droneID = 2, servicedTreeID = 2, position = 'A1'}
+TreeToPickTomatoesFrom = {treeID = 1 , position = 'A1', type = 'cherry', pick_start = 1, pick_end = 40}
+t = t.plus(20 seconds)
+
+DronePicking = {droneID = 1, servicedTreeID = 1, position = 'A1'}
+
+
+TreeToPickTomatoesFrom = {treeID = 2 , position = 'B2', type = 'yellow', pick_start =  3, pick_end = 70}
+t=t.plus(20 seconds)
+
+
+
+DronePicking = {droneID = 2, servicedTreeID = 2, position = 'B2'}
+t=t.plus(20 seconds)
+
+
 ```
 
 ### Assignment

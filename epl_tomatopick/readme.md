@@ -38,6 +38,12 @@ The position attribute is represented as a string as it will not be used in this
 
 For now these attributes will suffice. We will modify them in the future.
 
+### Assumptions
+Before delving into the problem it is better to define some assumptions to better model the data stream and the queries:
+- multiple drones can pick tomatoes after a single issue of a _TreeToPickTomatoesFrom_ instance
+- multiple drones can pick tomatoes from the same tree
+- the time constraints of the _TreeToPickTomatoes_ are intrinsically respected by the system (we will come back to this later)
+
 ### Data stream generation
 In order to test the queries that will be later presented we will use the following data stream. It is suggested to modify it using different configurations to test wether your queries will work in different settings.
 

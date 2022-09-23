@@ -149,6 +149,7 @@ t=t.plus(20 seconds)
 ```
 
 With this data stream multiple _TreeToPickTomatoesFrom_ instances for the same trees are issued in different points in time.
+
 When **QInsert** is executed, the two every clauses in the pattern will insert multiple times the same object, since it will respect the pattern for both the _TreeToPickTomatoesFrom_ instances.
 
 We can modify the query in the following way:
@@ -160,8 +161,7 @@ SELECT b.droneID as dID, a.type as type
 FROM pattern[
 every a = TreeToPickTomatoesFrom() 
 -> 
-every b = DronePicking(
-b.servicedTreeID = a.treeID)
+every b = DronePicking(b.servicedTreeID = a.treeID)
 and not c = TreeToPickTomatoesFrom(c.treeID = a.treeID)];
 ```
 By using the not clause the pattern will stop matching once a new istance of _TreeToPickTomatoesFrom_ is issued with a treeID of a request already present in the past.
@@ -175,12 +175,64 @@ GROUP BY type
 output all every 20 seconds;
 ```
 A 5 minutes-long hopping window is implemented.
+
 Because of the aggregating function count(), the group by clause is used (as in common SQL). 
+
 The output **all** clause is used to show all of the elements of the counting table. Using different clauses will provide more limited results.
 
+## Bonus: respecting time constraints
+Before writing the stream generation we made some assumptions, one of which was 
+> - the time constraints of the _TreeToPickTomatoesFrom_ are intrinsically respected by the system
+Let's say that we want to count of tomatoes picked per type only in the **time constraints** set by the _TreeToPickTomatoesFrom_.
+
+The modeling of the class itself needs to change: we need to introduce a new attribute to the DronePicking schema represented by the timestamp, the time at which such tomato was picked. 
+
+```  
+create schema DronePicking(
+droneID int,
+servicedTreeID int,
+position string,
+timestamp long
+);
+```  
+A modification to the data stream is also required to fit the new model.
+
+```  
+TreeToPickTomatoesFrom = {treeID = 1 , position = 'A1', type = 'cherry', pick_start = 1, pick_end = 40}
+t=t.plus(20 seconds)
+DronePicking = {droneID = 1, servicedTreeID = 1, position = 'A1', timestamp = 20}
+TreeToPickTomatoesFrom = {treeID = 2 , position = 'B2', type = 'yellow', pick_start = 3, pick_end = 70}
+t=t.plus(20 seconds)
+DronePicking = {droneID = 2, servicedTreeID = 2, position = 'A1', timestamp = 20}
+
+t = t.plus(20 seconds)
+
+DronePicking = {droneID = 1, servicedTreeID = 1, position = 'A1', timestamp = 41}
+
+t=t.plus(20 seconds) 
+
+TreeToPickTomatoesFrom = {treeID = 1 , position = 'A1', type = 'cherry', pick_start = 50, pick_end = 100}
+
+DronePicking = {droneID = 1, servicedTreeID = 1, position = 'A1', timestamp = 51}
+DronePicking = {droneID = 2, servicedTreeID = 2, position = 'B2', timestamp = 71}
+t=t.plus(5 minutes)
 
 
 
+DronePicking = {droneID = 2, servicedTreeID = 2, position = 'B2', timestamp = 72}
+t=t.plus(20 seconds)
+```  
+As you can see some of the tomatoes picked should not be counted having timestamps superior to the pick_end of the _TreeToPickTomatoesFrom_ instances.
 
-
-
+The new query to fit such constraints can be written as follows:
+```  
+@Name('QInsertTC')
+INSERT INTO requestFullfilled
+SELECT b.droneID as dID, a.type as type
+FROM pattern[
+every a = TreeToPickTomatoesFrom() 
+-> 
+every b = DronePicking(b.servicedTreeID = a.treeID, b.timestamp < a.pick_end, b.timestamp > a.pick_start)
+and not c = TreeToPickTomatoesFrom(c.treeID = a.treeID)];
+```  
+It is suggested to try out all the queries at the same time and to check their results using the _Output Per Statement_ function of the EPL online tool to check the difference between these solutions, and the effects of the modifications.

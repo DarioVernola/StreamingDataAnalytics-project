@@ -50,24 +50,35 @@ In order to test the queries that will be later presented we will use the follow
 ```  
 TreeToPickTomatoesFrom = {treeID = 1 , position = 'A1', type = 'cherry', pick_start = 1, pick_end = 40}
 t=t.plus(20 seconds)
+
 DronePicking = {droneID = 1, servicedTreeID = 1, position = 'A1'}
+
 TreeToPickTomatoesFrom = {treeID = 2 , position = 'B2', type = 'yellow', pick_start = 3, pick_end = 70}
+
 t=t.plus(20 seconds)
+
+
 DronePicking = {droneID = 2, servicedTreeID = 2, position = 'A1'}
 
+
 t = t.plus(20 seconds)
+
 
 DronePicking = {droneID = 1, servicedTreeID = 1, position = 'A1'}
 
 t=t.plus(20 seconds) 
 
+
 DronePicking = {droneID = 1, servicedTreeID = 1, position = 'A1'}
+
 DronePicking = {droneID = 2, servicedTreeID = 2, position = 'B2'}
+
+
 t=t.plus(20 seconds)
 
-
-
 DronePicking = {droneID = 2, servicedTreeID = 2, position = 'B2'}
+
+
 t=t.plus(20 seconds)
 ```
 
@@ -75,6 +86,9 @@ t=t.plus(20 seconds)
 
 > Tell every 20 seconds how many tomatoes the drones picked in the last 5 minutes grouped by their kind.
 
+A single query to tackle this problem is not enough: we first need to use a support class (in this case _requestFullFilled_) that "stores" the type of the tomato that the drone just picked.
+
+#### Solution
 ```  
 @Name('QInsert')
 INSERT INTO requestFullfilled
@@ -86,14 +100,86 @@ every b = DronePicking(
 b.servicedTreeID = a.treeID
 )];
 ```
+In this solution select the droneID (not strictly necessary) and the type of the tomato picked by a drone which respects the pattern
+> every a = TreeToPickTomatoesFrom() -> every b = DronePicking(b.servicedTreeID = a.treeID)
 
+The two every clauses are needed since there may be multiple instances of _TreeToPickTomatoesFrom_ for different trees and we need to track ALL of the drones picks for each one of them. It is suggested to test what happens if a different pattern is chosen.
+
+### Is this enough?
+
+Let's try to change the data generation schema, using the following one: 
+
+```  
+TreeToPickTomatoesFrom = {treeID = 1 , position = 'A1', type = 'cherry', pick_start = 1, pick_end = 40}
+
+
+t=t.plus(20 seconds)
+
+DronePicking = {droneID = 1, servicedTreeID = 1, position = 'A1'}
+
+TreeToPickTomatoesFrom = {treeID = 2 , position = 'B2', type = 'yellow', pick_start = 3, pick_end = 70}
+
+
+t=t.plus(20 seconds)
+
+DronePicking = {droneID = 2, servicedTreeID = 2, position = 'A1'}
+
+
+t = t.plus(20 seconds)
+
+DronePicking = {droneID = 1, servicedTreeID = 1, position = 'A1'}
+
+
+t=t.plus(20 seconds) 
+
+TreeToPickTomatoesFrom = {treeID = 1 , position = 'A1', type = 'cherry', pick_start = 50, pick_end = 100}
+
+DronePicking = {droneID = 1, servicedTreeID = 1, position = 'A1'}
+
+DronePicking = {droneID = 2, servicedTreeID = 2, position = 'B2'}
+
+t=t.plus(5 minutes)
+
+
+
+DronePicking = {droneID = 2, servicedTreeID = 2, position = 'B2'}
+
+
+t=t.plus(20 seconds)
+```
+
+With this data stream multiple _TreeToPickTomatoesFrom_ instances for the same trees are issued in different points in time.
+When **QInsert** is executed, the two every clauses in the pattern will insert multiple times the same object, since it will respect the pattern for both the _TreeToPickTomatoesFrom_ instances.
+
+We can modify the query in the following way:
+### New solution
+```  
+@Name('QInsertNEW')
+INSERT INTO requestFullfilled
+SELECT b.droneID as dID, a.type as type
+FROM pattern[
+every a = TreeToPickTomatoesFrom() 
+-> 
+every b = DronePicking(
+b.servicedTreeID = a.treeID)
+and not c = TreeToPickTomatoesFrom(c.treeID = a.treeID)];
+```
+By using the not clause the pattern will stop matching once a new istance of _TreeToPickTomatoesFrom_ is issued with a treeID of a request already present in the past.
+
+Finally, we can solve the given problem with a simple query on the newly generated class:
 ```  
 @Name('QFinal')
 SELECT type, count(*)
 FROM requestFullfilled.win:time(5 minutes)
 GROUP BY type
-output  all every 20 seconds;
+output all every 20 seconds;
 ```
+A 5 minutes-long hopping window is implemented.
+Because of the aggregating function count(), the group by clause is used (as in common SQL). 
+The output **all** clause is used to show all of the elements of the counting table. Using different clauses will provide more limited results.
+
+
+
 
 
 

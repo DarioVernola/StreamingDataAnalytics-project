@@ -42,51 +42,27 @@ For now these attributes will suffice. We will modify them in the future.
 In order to test the queries that will be later presented we will use the following data stream. It is suggested to modify it using different configurations to test wether your queries will work in different settings.
 
 ```  
-
-TreeToPickTomatoesFrom = {treeID = 1 , position = 'A1', type = 'cherry', pick_start = 1, pick_end = 40}
-t=t.plus(1 minutes)
-TreeToPickTomatoesFrom = {treeID = 2 , position = 'B2', type = 'yellow', pick_start = 3, pick_end = 70}
-t=t.plus(1 minutes)
-
-DronePicking = {droneID = 1, servicedTreeID = 1, position = 'A1'}
-TreeToPickTomatoesFrom = {treeID = 1 , position = 'A1', type = 'cherry', pick_start = 1, pick_end = 40}
-TreeToPickTomatoesFrom = {treeID = 2 , position = 'B2', type = 'yellow', pick_start =  3, pick_end = 70}
-t=t.plus(1 minutes)
-
-
-DronePicking = {droneID = 2, servicedTreeID = 2, position = 'B2'}
-
-
-t=t.plus(5 minutes)
-DronePicking = {droneID = 1, servicedTreeID = 2, position = 'B2'}
-DronePicking = {droneID = 2, servicedTreeID = 1, position = 'A1'}
-t=t.plus(20 seconds)
-
-
-trial
-
-
 TreeToPickTomatoesFrom = {treeID = 1 , position = 'A1', type = 'cherry', pick_start = 1, pick_end = 40}
 t=t.plus(20 seconds)
 DronePicking = {droneID = 1, servicedTreeID = 1, position = 'A1'}
 TreeToPickTomatoesFrom = {treeID = 2 , position = 'B2', type = 'yellow', pick_start = 3, pick_end = 70}
 t=t.plus(20 seconds)
 DronePicking = {droneID = 2, servicedTreeID = 2, position = 'A1'}
-TreeToPickTomatoesFrom = {treeID = 1 , position = 'A1', type = 'cherry', pick_start = 1, pick_end = 40}
+
 t = t.plus(20 seconds)
 
 DronePicking = {droneID = 1, servicedTreeID = 1, position = 'A1'}
 
+t=t.plus(20 seconds) 
 
-TreeToPickTomatoesFrom = {treeID = 2 , position = 'B2', type = 'yellow', pick_start =  3, pick_end = 70}
+DronePicking = {droneID = 1, servicedTreeID = 1, position = 'A1'}
+DronePicking = {droneID = 2, servicedTreeID = 2, position = 'B2'}
 t=t.plus(20 seconds)
 
 
 
 DronePicking = {droneID = 2, servicedTreeID = 2, position = 'B2'}
 t=t.plus(20 seconds)
-
-
 ```
 
 ### Assignment
@@ -96,12 +72,12 @@ t=t.plus(20 seconds)
 ```  
 @Name('QInsert')
 INSERT INTO requestFullfilled
-SELECT b.id, a.type
+SELECT b.droneID as dID, a.type as type
 FROM pattern[
 every a = TreeToPickTomatoesFrom() 
 -> 
-every b = DroneTracking(
-b.treeDroneID = a.treeID
+every b = DronePicking(
+b.servicedTreeID = a.treeID
 )];
 ```
 
@@ -109,8 +85,8 @@ b.treeDroneID = a.treeID
 @Name('QFinal')
 SELECT type, count(*)
 FROM requestFullfilled.win:time(5 minutes)
-GROUP BY type,
-output last every 20 seconds;
+GROUP BY type
+output  all every 20 seconds;
 ```
 
 

@@ -1,4 +1,4 @@
-# Tomato pick example 
+# Tomato pick EPL exam
 ## Resources
 
 - [espertech](https://www.espertech.com/)

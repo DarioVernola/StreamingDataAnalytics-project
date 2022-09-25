@@ -13,7 +13,7 @@ A data stream includes the information about the trees to pick tomatoes from. Th
 ### Modeling
 > Formalize in EPL the schema of the two streams.
 
-Reading the description carefully it is possible to derive the following schemes:
+Reading the description carefully it is possible to derive the following schemas:
 
 
 ```  
@@ -32,7 +32,7 @@ position string
 );
 ```
 
-An instance of the **TreeToPickTomatoesFrom** schema translates to a command given to the drones to pick tomatoes from it, whereas an instance of the **DronePicking** schema is issued once a certain drone has picked one tomato.
+An instance of the **TreeToPickTomatoesFrom** stream translates to a command given to the drones to pick tomatoes from it, whereas an instance of the **DronePicking** stream is issued once a certain drone has picked one tomato.
 
 The position attribute is represented as a string as it will not be used in this example.
 
@@ -92,7 +92,7 @@ t=t.plus(20 seconds)
 
 > Tell every 20 seconds how many tomatoes the drones picked in the last 5 minutes grouped by their kind.
 
-A single query to tackle this problem is not enough: we first need to use a support class (in this case _requestFullFilled_) that "stores" the type of the tomato that the drone just picked.
+A single query to tackle this problem is not enough: we first need to use a "support" stream (in this case _requestFullFilled_) that "stores" the type of the tomato that the drone just picked.
 
 #### Solution
 ```  
@@ -105,7 +105,7 @@ every a = TreeToPickTomatoesFrom()
 every b = DronePicking(b.servicedTreeID = a.treeID)
 ];
 ```
-In this solution select the droneID (not strictly necessary) and the type of the tomato picked by a drone which respects the pattern
+This solution selects the droneID (not strictly necessary) and the type of the tomato picked by a drone which respects the pattern
 > every a = TreeToPickTomatoesFrom() -> every b = DronePicking(b.servicedTreeID = a.treeID)
 
 The two every clauses are needed since there may be multiple instances of _TreeToPickTomatoesFrom_ for different trees and we need to track ALL of the drones picks for each one of them. It is suggested to test what happens if a different pattern is chosen.
@@ -264,4 +264,4 @@ every b = DronePicking(b.servicedTreeID = a.treeID, b.timestamp < a.pick_end, b.
 and not c = TreeToPickTomatoesFrom(c.treeID = a.treeID)
 ];
 ```  
-It is suggested to try out all the queries at the same time and to check their results using the _Output Per Statement_ function of the EPL online tool to check the difference between these solutions, and the effects of the modifications.
+It is suggested to try out multiple queries at the same time and to check their results using the _Output Per Statement_ function of the EPL online tool to check the difference between these solutions, and the effects of the modifications.

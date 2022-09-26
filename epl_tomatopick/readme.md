@@ -194,7 +194,7 @@ The output **all** clause is used to show all of the elements of the counting ta
 Before writing the stream generation we made some assumptions, one of which was 
 > - the time constraints of the _TreeToPickTomatoesFrom_ are intrinsically respected by the system
 
-Let's say that we want to count of tomatoes picked per type only in the **time constraints** set by the _TreeToPickTomatoesFrom_.
+Let's say that we want to know the count of tomatoes picked per type only in the **time constraints** set by the _TreeToPickTomatoesFrom_.
 
 The modeling of the class itself needs to change: we need to introduce a new attribute to the DronePicking schema represented by the timestamp, the time at which such tomato was picked. 
 

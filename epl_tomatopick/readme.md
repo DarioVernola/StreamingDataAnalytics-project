@@ -284,7 +284,7 @@ and not c = TreeToPickTomatoesFrom(c.treeID = a.treeID)
 ```  
 @Name('QFinal')
 SELECT type, count(*)
-FROM requestFullfilled.win:time(5 minutes)
+FROM lateTomatoes.win:time(5 minutes)
 GROUP BY type
 output all every 1 minutes;
 ```

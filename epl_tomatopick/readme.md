@@ -266,7 +266,27 @@ and not c = TreeToPickTomatoesFrom(c.treeID = a.treeID)
 ```  
 
 ## Another exam problem
->Tell every minute how many drones in the last 5 minutes are late in picking fruits from the the trees. A drone is late, if it picks a fruit from a tree it is no >longer supposed to pick the fruit from, i.e., the time it picks a fruit is not in the interval requested in the stream of commands for such a tree.
+>Tell every minute how many drones in the last 5 minutes are late in picking fruits from the the trees. A drone is late, if it picks a fruit from a tree it is no longer supposed to pick the fruit from, i.e., the time it picks a fruit is not in the interval requested in the stream of commands for such a tree.
 
+
+```  
+@Name('QInsert')
+INSERT INTO lateTomatoes
+SELECT b.droneID as dID, a.type as type
+FROM pattern[
+every a = TreeToPickTomatoesFrom() 
+-> 
+every b = DronePicking(b.servicedTreeID = a.treeID, b.timestamp > a.pick_end)
+and not c = TreeToPickTomatoesFrom(c.treeID = a.treeID)
+];
+```  
+
+```  
+@Name('QFinal')
+SELECT type, count(*)
+FROM requestFullfilled.win:time(5 minutes)
+GROUP BY type
+output all every 1 minutes;
+```
 
 It is suggested to try out multiple queries at the same time and to check their results using the _Output Per Statement_ function of the EPL online tool to check the difference between these solutions, and the effects of the modifications.

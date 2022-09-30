@@ -264,4 +264,9 @@ every b = DronePicking(b.servicedTreeID = a.treeID, b.timestamp < a.pick_end, b.
 and not c = TreeToPickTomatoesFrom(c.treeID = a.treeID)
 ];
 ```  
+
+## Another exam problem
+>Tell every minute how many drones in the last 5 minutes are late in picking fruits from the the trees. A drone is late, if it picks a fruit from a tree it is no >longer supposed to pick the fruit from, i.e., the time it picks a fruit is not in the interval requested in the stream of commands for such a tree.
+
+
 It is suggested to try out multiple queries at the same time and to check their results using the _Output Per Statement_ function of the EPL online tool to check the difference between these solutions, and the effects of the modifications.

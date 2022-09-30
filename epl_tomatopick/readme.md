@@ -268,25 +268,35 @@ and not c = TreeToPickTomatoesFrom(c.treeID = a.treeID)
 ## Another exam problem
 >Tell every minute how many drones in the last 5 minutes are late in picking fruits from the the trees. A drone is late, if it picks a fruit from a tree it is no longer supposed to pick the fruit from, i.e., the time it picks a fruit is not in the interval requested in the stream of commands for such a tree.
 
+As seen before, we must create a query that updates a custom stream ( _lateTomatoes_ ) whenever a drone picks a tomatoes outside the boundaries set in the latest _TreeToPickTomatoesFrom_ issue.
+
+In order to do that, it is possible to modify the "QInsertTC" query pattern in the following way:
 
 ```  
-@Name('QInsert')
+@Name('QLateInsert')
 INSERT INTO lateTomatoes
-SELECT b.droneID as dID, a.type as type
+SELECT b.droneID as dID, b.timestamp as TS
 FROM pattern[
 every a = TreeToPickTomatoesFrom() 
 -> 
 every b = DronePicking(b.servicedTreeID = a.treeID, b.timestamp > a.pick_end)
 and not c = TreeToPickTomatoesFrom(c.treeID = a.treeID)
 ];
-```  
+``` 
+In this case, selecting the type is no longer necessary.
+
+Lastly, a count of the issues of the stream is required. To do so we can use the following query:
+
 
 ```  
-@Name('QFinal')
-SELECT type, count(*)
+@Name('QFinalLT')
+SELECT count(*)
 FROM lateTomatoes.win:time(5 minutes)
-GROUP BY type
-output all every 1 minutes;
+output last every 1 minutes;
 ```
+
+The _Group By_ clause is no longer necessary, since the assignment does not require to count the late picks for each drone, but the count of total late picks. 
+For this reason the output will be a single number, hence the switch from "all" to "late" as the output clause. 
+
 
 It is suggested to try out multiple queries at the same time and to check their results using the _Output Per Statement_ function of the EPL online tool to check the difference between these solutions, and the effects of the modifications.

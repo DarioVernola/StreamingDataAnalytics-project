@@ -28,4 +28,34 @@ Please refer to the [EPL version](https://github.com/DarioVernola/StreamingDataA
 
 **Modeling**
 > Propose a model for the described streams.
+ ```
+ CREATE STREAM TreeToPickTomatoesFrom_STREAM (treeID INT, position VARCHAR, type VARCHAR, ts VARCHAR, pick_start VARCHAR, pick_end VARCHAR)
+  WITH (
+  kafka_topic='RoboticArm_topic', 
+  value_format='json', 
+  partitions=1,
+  timestamp='ts',
+  timestamp_format='yyyy-MM-dd''T''HH:mm:ssZ');
+  
+  CREATE STREAM DronePicking_STREAM (droneID INT, servicedTreeID INT, position VARCHAR, ts VARCHAR)
+  WITH (
+  kafka_topic='RoboticArm_topic', 
+  value_format='json', 
+  partitions=1,
+  timestamp='ts',
+  timestamp_format='yyyy-MM-dd''T''HH:mm:ssZ');
+ ```
+ 
+ **Data stream Generation**
+ ```
+INSERT INTO TreeToPickTomatoesFrom_STREAM (treeID, position, type, ts, pick_start, pick_end) VALUES (1, 'A1', 'cherry', '2021-10-23T06:00:01+0200', '2021-10-23T06:00:01+0200', '2021-10-23T06:40:01+0200');
+INSERT INTO DronePicking_STREAM (droneID, servicedTreeID, position, ts) VALUES (1, 1, 'A1', '2021-10-23T06:00:20+0200');
+INSERT INTO TreeToPickTomatoesFrom_STREAM (treeID, position, type, ts, pick_start, pick_end) VALUES (2, 'B2', 'yellow', '2021-10-23T06:00:20+0200', '2021-10-23T06:00:20+0200', '2021-10-23T07:10:01+0200');
+INSERT INTO DronePicking_STREAM (droneID, servicedTreeID, position, ts) VALUES (2, 2, 'B2', '2021-10-23T06:00:40+0200');
+INSERT INTO DronePicking_STREAM (droneID, servicedTreeID, position, ts) VALUES (1, 1, 'A1', '2021-10-23T06:01:00+0200');
+INSERT INTO TreeToPickTomatoesFrom_STREAM (treeID, position, type, ts, pick_start, pick_end) VALUES (1, 'A1', 'cherry', '2021-10-23T06:01:20+0200', '2021-10-23T06:01:20+0200', '2021-10-23T06:8:20+0200');
+INSERT INTO DronePicking_STREAM (droneID, servicedTreeID, position, ts) VALUES (1, 1, 'A1', '2021-10-23T06:01:20+0200');
+INSERT INTO DronePicking_STREAM (droneID, servicedTreeID, position, ts) VALUES (2, 2, 'B2', '2021-10-23T06:01:20+0200');
+INSERT INTO DronePicking_STREAM (droneID, servicedTreeID, position, ts) VALUES (2, 2, 'B2', '2021-10-23T06:06:20+0200');
+ ```
 

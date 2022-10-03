@@ -47,7 +47,7 @@ Please refer to the [EPL version](https://github.com/DarioVernola/StreamingDataA
  ```
  
  **Data stream Generation**
- ```
+```
 INSERT INTO TreeToPickTomatoesFrom_STREAM (treeID, position, type, ts, pick_start, pick_end) VALUES (1, 'A1', 'cherry', '2021-10-23T06:00:01+0200', '2021-10-23T06:00:01+0200', '2021-10-23T06:40:01+0200');
 INSERT INTO DronePicking_STREAM (droneID, servicedTreeID, position, ts) VALUES (1, 1, 'A1', '2021-10-23T06:00:20+0200');
 INSERT INTO TreeToPickTomatoesFrom_STREAM (treeID, position, type, ts, pick_start, pick_end) VALUES (2, 'B2', 'yellow', '2021-10-23T06:00:20+0200', '2021-10-23T06:00:20+0200', '2021-10-23T07:10:01+0200');
@@ -57,5 +57,17 @@ INSERT INTO TreeToPickTomatoesFrom_STREAM (treeID, position, type, ts, pick_star
 INSERT INTO DronePicking_STREAM (droneID, servicedTreeID, position, ts) VALUES (1, 1, 'A1', '2021-10-23T06:01:20+0200');
 INSERT INTO DronePicking_STREAM (droneID, servicedTreeID, position, ts) VALUES (2, 2, 'B2', '2021-10-23T06:01:20+0200');
 INSERT INTO DronePicking_STREAM (droneID, servicedTreeID, position, ts) VALUES (2, 2, 'B2', '2021-10-23T06:06:20+0200');
- ```
+```
+```
+CREATE STREAM RequestFullfilled_STREAM AS SELECT droneID AS dID, type AS tom_type
+FROM TreeToPickTomatoesFrom_STREAM AS TPTF JOIN DronePicking_STREAM AS DP ON TPTF.treeID = DP.servicedTreeID
+EMIT CHANGES;
+```
 
+```
+SELECT tom_type, count(*)
+FROM RequestFullfilled_STREAM WINDOW HOPPING(SIZE 5 MINUTES, ADVANCE BY 20 SECONDS)
+GROUP BY tom_type
+EMIT CHANGES;
+
+```

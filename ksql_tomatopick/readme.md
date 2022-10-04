@@ -60,7 +60,7 @@ INSERT INTO DronePicking_STREAM (droneID, servicedTreeID, position, ts) VALUES (
 ```
 ```
 CREATE STREAM RequestFullfilled_STREAM AS SELECT TPTF.treeID AS tID, DP.droneID AS dID, TPTF.type AS tom_type
-FROM TreeToPickTomatoesFrom_STREAM AS TPTF JOIN DronePicking_STREAM AS DP ON TPTF.treeID = DP.servicedTreeID
+FROM TreeToPickTomatoesFrom_STREAM AS TPTF JOIN DronePicking_STREAM AS DP  WITHIN 5 minutes ON TPTF.treeID = DP.servicedTreeID
 EMIT CHANGES;
 ```
 

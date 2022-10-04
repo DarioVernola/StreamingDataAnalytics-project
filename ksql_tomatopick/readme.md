@@ -31,7 +31,7 @@ Please refer to the [EPL version](https://github.com/DarioVernola/StreamingDataA
  ```
  CREATE STREAM TreeToPickTomatoesFrom_STREAM (treeID INT, position VARCHAR, type VARCHAR, ts VARCHAR, pick_start VARCHAR, pick_end VARCHAR)
   WITH (
-  kafka_topic='RoboticArm_topic', 
+  kafka_topic='TreeToPickTomatoes_topic', 
   value_format='json', 
   partitions=1,
   timestamp='ts',
@@ -39,7 +39,7 @@ Please refer to the [EPL version](https://github.com/DarioVernola/StreamingDataA
   
   CREATE STREAM DronePicking_STREAM (droneID INT, servicedTreeID INT, position VARCHAR, ts VARCHAR)
   WITH (
-  kafka_topic='RoboticArm_topic', 
+  kafka_topic='DronePicking_topic', 
   value_format='json', 
   partitions=1,
   timestamp='ts',
@@ -59,15 +59,15 @@ INSERT INTO DronePicking_STREAM (droneID, servicedTreeID, position, ts) VALUES (
 INSERT INTO DronePicking_STREAM (droneID, servicedTreeID, position, ts) VALUES (2, 2, 'B2', '2021-10-23T06:06:20+0200');
 ```
 ```
-CREATE STREAM RequestFullfilled_STREAM AS SELECT TPTF.treeID AS tID, DP.droneID AS dID, TPTF.type AS tom_type
-FROM TreeToPickTomatoesFrom_STREAM AS TPTF JOIN DronePicking_STREAM AS DP  WITHIN 5 minutes ON TPTF.treeID = DP.servicedTreeID
+CREATE STREAM RequestFullfilled_STREAM AS 
+SELECT TPTF.treeID AS tID, TPTF.type AS tom_type
+FROM TreeToPickTomatoesFrom_STREAM AS TPTF JOIN DronePicking_STREAM AS DP  WITHIN 40 seconds ON TPTF.treeID = DP.servicedTreeID
 EMIT CHANGES;
 ```
 
 ```
-SELECT tom_type, count(*)
+SELECT tom_type, count(*) AS Count
 FROM RequestFullfilled_STREAM WINDOW HOPPING(SIZE 5 MINUTES, ADVANCE BY 20 SECONDS)
 GROUP BY tom_type
 EMIT CHANGES;
-
 ```
